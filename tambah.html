@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAMBAH SOBAT PENGINGAT</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+</head>
+<header>
+    <button class="logout-btn" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+    </button>
+</header>
+<body>
+    <p>TAMBAH KEGIATAN</p>
+
+    <div id="formadd">
+        <div class="avtivity">
+            <i class="fas fa-business-time"></i>
+            <input type="text" id="kegiatan" placeholder="Nama Kegiatan" required>
+        </div>
+        <div class="location">
+            <i class="fas fa-map-marker-alt"></i>
+            <input type="text" id="lokasi" placeholder="Lokasi Kegiatan" required>
+        </div>
+        <div class="date">
+            <i class="fas fa-calendar-alt"></i>
+            <input type="date" id="tanggal" placeholder="Tanggal Kegiatan" required>
+        </div>
+        <div class="clock">
+            <i class="fas fa-clock-four"></i>
+            <input type="time" id="waktu" step="60" required>
+        </div>
+        <button onclick="addevent()">TAMBAH</button>
+    </div>
+
+    <div id="status"></div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, getDoc, collection, addDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAGMRPOqYE91YR0EV1cU56F2_-AmFzvLBg",
+            authDomain: "sobat-pengingat.firebaseapp.com",
+            projectId: "sobat-pengingat",
+            storageBucket: "sobat-pengingat.firebasestorage.app",
+            messagingSenderId: "963398205253",
+            appId: "1:963398205253:web:9c76c5489f9567e12b482c",
+            measurementId: "G-ZV0JQCLZC8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const username = userDoc.data().username;
+                    console.log("Username:", username);
+
+                    window.currentUsername = username;
+                    alert(`Selamat datang, ${username}!`);
+                } 
+            }
+            else {
+                console.log("User belum login");
+            }
+        });
+
+        window.addevent = async () => {
+            const username = window.currentUsername;
+            const kegiatan = document.getElementById("kegiatan").value;
+            const lokasi = document.getElementById("lokasi").value;
+            const tanggal = document.getElementById("tanggal").value;
+            const waktu = document.getElementById("waktu").value;
+
+            if (!kegiatan || !lokasi || !tanggal || !waktu) {
+                document.getElementById("status").innerText = "Form wajib diisi!";
+                return;
+            }
+
+            try {
+                await setDoc(doc(db, username, tanggal + waktu), {
+                    kegiatan: kegiatan,
+                    lokasi: lokasi,
+                    tanggal: tanggal,
+                    waktu: waktu
+                });
+                document.getElementById("status").innerText = "Data berhasil disimpan!";
+            } catch (error) {
+                console.error("Error menambah data: ", error);
+                document.getElementById("status").innerText = "Gagal menyimpan data!";
+            }
+        };
+
+        window.logout = () => {
+            signOut(auth).then(() => {
+                window.location.href = "login.html";
+            }).catch((error) => {
+                console.error("Logout gagal:", error);
+            });
+        };
+    </script>
+</body>
+</html>

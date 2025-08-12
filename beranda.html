@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOBAT PENGINGAT</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+</head>
+<header>
+    <button class="logout-btn" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+    </button>
+</header>
+<body>
+    <p>BERANDA SOBAT PENGINGAT</p>
+    <p class="card">
+        <p class="cardtitle">KEGIATAN HARI INI</p>
+        <div id="container"></div>
+    </p>
+    <button class="addnew" onclick="addnew()">
+        <i class="fas fa-plus"></i>
+        <h3>TAMBAH</h3>
+    </button>
+    <button class="editform" onclick="editform()">
+        <i class="fas fa-pen"></i>
+        <h3>EDIT</h3>
+    </button>
+    
+    <div id="status"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, getDoc, getDocs, collection, addDoc, doc, setDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAGMRPOqYE91YR0EV1cU56F2_-AmFzvLBg",
+            authDomain: "sobat-pengingat.firebaseapp.com",
+            projectId: "sobat-pengingat",
+            storageBucket: "sobat-pengingat.firebasestorage.app",
+            messagingSenderId: "963398205253",
+            appId: "1:963398205253:web:9c76c5489f9567e12b482c",
+            measurementId: "G-ZV0JQCLZC8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const container = document.getElementById("container");
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const username = userDoc.data().username;
+                    console.log("Username:", username);
+
+                    window.currentUsername = username;
+                    alert(`Selamat datang, ${username}!`);
+                    await getKegiatanSekarang(username);
+                } 
+            }
+            else {
+                console.log("User belum login");
+            }
+        });
+
+        function getTanggalSekarang() {
+            const today = new Date();
+            return today.toISOString().split("T")[0];
+        }
+
+        async function getKegiatanSekarang(username) {
+            const sekarang = getTanggalSekarang();
+
+            const q = query(
+                collection(db, username),
+                where("tanggal", "==", sekarang)
+            );
+
+            const querySnapshot = await getDocs(q);
+            container.innerHTML = "";
+
+            if (querySnapshot.empty) {
+                container.innerHTML = "<p>Tidak ada kegiatan hari ini.</p>";
+                return;
+            }
+
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                container.innerHTML += `
+                    <p><strong>${data.kegiatan}</strong> di ${data.lokasi} (${data.tanggal})</p>
+                `;
+            });
+        }
+
+        window.addnew = () => {
+            window.location.href = "tambah.html";
+        }
+
+        window.editform = () => {
+            window.location.href = "edit.html";
+        }
+
+        window.logout = () => {
+            signOut(auth).then(() => {
+                window.location.href = "login.html";
+            }).catch((error) => {
+                console.error("Logout gagal:", error);
+            });
+        };
+    </script>
+</body>
+</html>
