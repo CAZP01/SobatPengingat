@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOGIN SOBAT PENGINGAT</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+<body>
+    <div class="container">
+        <div class="avatar">
+        <i class="fas fa-user"></i>
+        </div>
+        <p>WELCOME TO SOBAT PENGINGAT</p>
+
+        <div id="authSection">
+        <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="email" placeholder="Email" required>
+        </div>
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="password" placeholder="Password" required>
+        </div>
+        <button onclick="login()">LOGIN</button>
+        <a href="daftar.html">CREATE NEW ACCOUNT</a>
+        </div>
+
+        <div id="status"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAGMRPOqYE91YR0EV1cU56F2_-AmFzvLBg",
+            authDomain: "sobat-pengingat.firebaseapp.com",
+            projectId: "sobat-pengingat",
+            storageBucket: "sobat-pengingat.firebasestorage.app",
+            messagingSenderId: "963398205253",
+            appId: "1:963398205253:web:9c76c5489f9567e12b482c",
+            measurementId: "G-ZV0JQCLZC8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        window.login = () => {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then(() => {
+                    document.getElementById("status").innerText = "Login berhasil!";
+                })
+                .catch((error) => {
+                    document.getElementById("status").innerText = "Email/Password Invalid";
+                });
+        };
+            
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.location.href = "beranda.html";
+            }
+        });
+    </script>
+</body>
+</html>
