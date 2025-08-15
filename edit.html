@@ -3,9 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EDIT SOBAT PENGINGAT</title>
+    <title>SOBAT PENGINGAT</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
 </head>
+<header>
+    <button class="logout-btn" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+    </button>
+    <button class="back-btn" onclick="back()">
+        <i class="fas fa-home"></i>
+    </button>
+</header>
 <body>
+    <p>EDIT SOBAT PENGINGAT</p>
+    <p class="card">
+        <p class="cardtitle">KEGIATAN HARI INI</p>
+        <div id="container"></div>
+    </p>
     
+    <div id="status"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, getDoc, getDocs, collection, addDoc, doc, setDoc, query, where, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAGMRPOqYE91YR0EV1cU56F2_-AmFzvLBg",
+            authDomain: "sobat-pengingat.firebaseapp.com",
+            projectId: "sobat-pengingat",
+            storageBucket: "sobat-pengingat.firebasestorage.app",
+            messagingSenderId: "963398205253",
+            appId: "1:963398205253:web:9c76c5489f9567e12b482c",
+            measurementId: "G-ZV0JQCLZC8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const container = document.getElementById("container");
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const username = userDoc.data().username;
+                    console.log("Username:", username);
+
+                    window.currentUsername = username;
+                    alert(`Selamat datang, ${username}!`);
+                    await getKegiatanSekarang(username);
+                } 
+            }
+            else {
+                console.log("User belum login");
+            }
+        });
+
+        async function getKegiatanSekarang(username) {
+
+            const q = query(
+                collection(db, username ),
+                orderBy ("tanggal", "asc")
+            );
+
+            const querySnapshot = await getDocs(q);
+            container.innerHTML = "";
+
+            if (querySnapshot.empty) {
+                container.innerHTML = "<p>Tidak ada kegiatan hari ini.</p>";
+                return;
+            }
+
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                container.innerHTML += `
+                    <p>
+                        <strong>${data.kegiatan}</strong> di ${data.lokasi} (${data.tanggal}) pukul ${data.waktu}
+                        <button onclick="hapusKegiatan('${username}', '${doc.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </p>
+                `;
+            });
+        }
+
+        window.hapusKegiatan = async function(username, documentId) {
+            if (confirm("Yakin ingin menghapus kegiatan ini?")) {
+                try {
+                    await deleteDoc(doc(db, username, documentId));
+                    alert("Kegiatan berhasil dihapus");
+                    getKegiatanSekarang(username);
+                } catch (error) {
+                    console.error("Gagal menghapus:", error);
+                }
+            }
+        }
+
+        window.logout = () => {
+            signOut(auth).then(() => {
+                window.location.href = "login.html";
+            }).catch((error) => {
+                console.error("Logout gagal:", error);
+            });
+        };
+
+        window.back = () => {
+            window.location.href = "beranda.html";
+        };
+    </script>
 </body>
 </html>
