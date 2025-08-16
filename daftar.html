@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOGIN SOBAT PENGINGAT</title>
+    <title>DAFTAR SOBAT PENGINGAT</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
     <style>
@@ -91,26 +91,36 @@
             <i class="fas fa-user"></i>
         </div>
         <p class="greeting">WELCOME TO SOBAT PENGINGAT</p>
+        <p class="greeting">BUAT AKUN BARU</p>
 
         <div id="authSection">
-        <div class="input-group">
-            <p class="titleform">Email</p>
-            <input type="email" id="email" placeholder="Email" required>
-        </div>
-        <div class="input-group">
-            <p class="titleform">Password</p>
-            <input type="password" id="password" placeholder="Password" required>
-        </div>
-        <button onclick="login()">LOGIN</button>
+            <div class="input-group">
+                <p class="titleform">Email</p>
+                <input type="email" id="email" placeholder="Email" required>
+            </div>
+            <div class="input-group">
+                <p class="titleform">Username</p>
+                <input type="text" id="username" placeholder="Username" required>
+            </div>
+            <div class="input-group">
+                <p class="titleform">Password</p>
+                <input type="password" id="password" placeholder="Password" required>
+            </div>
+            <div class="input-group">
+                <p class="titleform">Konfirmasi Password</p>
+                <input type="password" id="passwordtry" placeholder="Konfigurasi Password" required>
+            </div>
+            <button onclick="register()">DAFTAR</button>
         </div>
 
-        <a href="daftar.html" class="kembali">Buat Akun Baru</a>
+        <a href="login.html" class="kembali">Sudah Ada Akun?</p>
         <div id="status"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getAuth, signOut, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAGMRPOqYE91YR0EV1cU56F2_-AmFzvLBg",
@@ -124,25 +134,35 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        window.login = () => {
-            const email = document.getElementById("email").value;
+        window.register = async () => {
+            const email = document.getElementById("email").value.trim();
+            const username = document.getElementById("username").value.trim();
             const password = document.getElementById("password").value;
+            const passwordtry = document.getElementById("passwordtry").value;
 
-            signInWithEmailAndPassword(auth, email, password)
-                .then(() => {
-                    document.getElementById("status").innerText = "Login berhasil!";
-                })
-                .catch((error) => {
-                    document.getElementById("status").innerText = "Email/Password Invalid";
-                });
-        };
-            
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                window.location.href = "beranda.html";
+            if (password !== passwordtry) {
+                document.getElementById("status").innerText = "Password tidak sesuai.";
+                return;
             }
-        });
+
+            try {
+                const statusUser = await createUserWithEmailAndPassword(auth, email, password);
+                const user = statusUser.user;
+
+                await setDoc(doc(db, "users", user.uid), {
+                    username: username,
+                    email: email
+                });
+
+                await signOut(auth);
+
+                window.location.href = "login.html";
+            } catch (error) {
+                document.getElementById("status").innerText = error.message;
+            }
+        };
     </script>
 </body>
 </html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOBAT PENGINGAT</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+    <style>
+        body {
+            font-family: 'Poppins';
+            background: #E8F5E9;
+            overflow-x: hidden;
+            text-align: center;
+        }
+        header {
+            background: #f5f5f5;
+            text-align: right;
+            height: 66px;
+            margin: -10px;
+        }
+        .logout-btn {
+            height: 35px;
+            width: 70px;
+            background: #F44336;
+            border: none;
+            border-radius: 5px;
+            color: #f5f5f5;
+            font-size: 16px;
+            margin: 15px;
+            cursor: pointer;
+        }
+        .card {
+            background-color: #C8B560;
+            padding: 5px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .cardtitle {
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .button-aksi {
+            display: flex;
+            flex-direction: column; 
+            align-items: center;   
+            gap: 12px;              
+        }
+        .button-aksi button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            background: #4CAF50;
+            width: 310px;
+            border: none;
+            border-radius: 5px;
+            height: 35px;
+            color: #f5f5f5;
+            font-size: 16px;
+            text-align: center;
+        }
+        .button-aksi h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+        .greeting {
+            margin-top: 30px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<header>
+    <button class="logout-btn" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+    </button>
+</header>
+<body>
+    <p id="greeting" class="greeting"></p>
+    <div class="card">
+        <p class="cardtitle">BERIKUT KEGIATAN HARI INI:</p>
+        <div id="container"></div>
+    </div>
+    <div class="button-aksi">
+        <button class="addnew" onclick="addnew()">
+            <i class="fas fa-plus"></i>
+            <h3>TAMBAH</h3>
+        </button>
+        <button class="editform" onclick="editform()">
+            <i class="fas fa-pen"></i>
+            <h3>EDIT</h3>
+        </button>
+    </div>
+    
+    <div id="status"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, getDoc, getDocs, collection, addDoc, doc, setDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAGMRPOqYE91YR0EV1cU56F2_-AmFzvLBg",
+            authDomain: "sobat-pengingat.firebaseapp.com",
+            projectId: "sobat-pengingat",
+            storageBucket: "sobat-pengingat.firebasestorage.app",
+            messagingSenderId: "963398205253",
+            appId: "1:963398205253:web:9c76c5489f9567e12b482c",
+            measurementId: "G-ZV0JQCLZC8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const container = document.getElementById("container");
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const username = userDoc.data().username;
+                    console.log("Username:", username);
+
+                    window.currentUsername = username;
+                    document.getElementById("greeting").innerHTML = `Selamat Datang, ${username}!`;
+                    await getKegiatanSekarang(username);
+                } 
+            }
+            else {
+                console.log("User belum login");
+            }
+        });
+
+        function getTanggalSekarang() {
+            const today = new Date();
+            return today.toISOString().split("T")[0];
+        }
+
+        async function getKegiatanSekarang(username) {
+            const sekarang = getTanggalSekarang();
+
+            const q = query(
+                collection(db, username),
+                where("tanggal", "==", sekarang)
+            );
+
+            const querySnapshot = await getDocs(q);
+            container.innerHTML = "";
+
+            if (querySnapshot.empty) {
+                container.innerHTML = "<p>Tidak ada kegiatan hari ini.</p>";
+                return;
+            }
+
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                container.innerHTML += `
+                    <p><strong>${data.kegiatan}</strong> di ${data.lokasi} (${data.tanggal} ${data.waktu})</p>
+                `;
+            });
+        }
+
+        window.addnew = () => {
+            window.location.href = "tambah.html";
+        }
+
+        window.editform = () => {
+            window.location.href = "edit.html";
+        }
+
+        window.logout = () => {
+            signOut(auth).then(() => {
+                window.location.href = "login.html";
+            }).catch((error) => {
+                console.error("Logout gagal:", error);
+            });
+        };
+    </script>
+</body>
+</html>
