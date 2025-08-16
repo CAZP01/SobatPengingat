@@ -5,28 +5,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LOGIN SOBAT PENGINGAT</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+    <style>
+        body {
+            display: flex;
+            font-family: 'Poppins';
+            background: #4CAF50;
+            height: 100vh;
+            overflow-x: hidden;
+            overflow-y: hidden;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background-color: #f5f5f5;
+            padding: 5px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .avatar {
+            margin-top: 15px;
+            margin-bottom: 15px;
+            background-color: #C8B560;
+            padding: 10px;
+            font-size: 40px;
+            height: 60px;
+            width: 60px;
+            border-radius: 100px;
+        }
+        .greeting {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+        .container button {
+            width: 310px;
+            height: 35px;
+            margin-bottom: 5px;
+            background: #4CAF50;
+            border-radius: 5px;
+            color: #f5f5f5;
+            font-size: 16px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .input-group {
+            margin: 15px;
+        }
+        .input-group input {
+            border: 1px solid #C8B560;
+            background: #f5f5f5;
+            height: 35px;
+            width: 300px;
+            padding-left: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            outline: none;
+        }
+        .titleform{
+            margin: 0px;
+            font-size: 12px;
+            text-align: left;
+        }
+        .kembali {
+            margin-top: 0px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #388E3C;
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <div class="avatar">
-        <i class="fas fa-user"></i>
+            <i class="fas fa-user"></i>
         </div>
-        <p>WELCOME TO SOBAT PENGINGAT</p>
+        <p class="greeting">WELCOME TO SOBAT PENGINGAT</p>
 
         <div id="authSection">
         <div class="input-group">
-            <i class="fas fa-envelope"></i>
+            <p class="titleform">Email</p>
             <input type="email" id="email" placeholder="Email" required>
         </div>
         <div class="input-group">
-            <i class="fas fa-lock"></i>
+            <p class="titleform">Password</p>
             <input type="password" id="password" placeholder="Password" required>
         </div>
         <button onclick="login()">LOGIN</button>
-        <a href="daftar.html">CREATE NEW ACCOUNT</a>
         </div>
 
+        <a href="daftar.html" class="kembali">Buat Akun Baru</a>
         <div id="status"></div>
     </div>
 
